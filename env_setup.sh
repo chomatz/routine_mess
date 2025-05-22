@@ -72,6 +72,7 @@ function deploy_container () {
 	echo running container
 	echo -----------------
 
+	mkdir -p ${WORK_DIRECTORY} &> /dev/null
 	podman unshare chown -R ${USER_UID}:${USER_GID} ${WORK_DIRECTORY}
 	podman run --detach --tty --security-opt label=disable --security-opt unmask=/proc/* --security-opt seccomp=unconfined --network host --user ${USER_NAME} --device /dev/fuse --name ${CONTAINER_NAME} --volume ${WORK_DIRECTORY}:/home/${USER_NAME}/${CONTAINER_NAME} --hostname ${CONTAINER_NAME} --env TERM=xterm-256color localhost/${CONTAINER_NAME}:latest
 
