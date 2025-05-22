@@ -78,8 +78,11 @@ function deploy_container () {
 
 	# start container if it exists - otherwise create it
 	if ($(podman inspect ${CONTAINER_NAME} &> /dev/null)); then
+
 		podman start ${CONTAINER_NAME}
+
 	else
+
 		podman run \
 		--detach \
 		--tty \
@@ -94,7 +97,11 @@ function deploy_container () {
 		--hostname ${CONTAINER_NAME} \
 		--env TERM=xterm-256color \
 		localhost/${IMAGE_NAME}:latest
+
 	fi
+
+	# connect to the running container
+	podman exec --interactive --tty --workdir /home/${USER_NAME} ${CONTAINER_NAME} bash
 
 }
 
