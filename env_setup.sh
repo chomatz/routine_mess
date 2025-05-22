@@ -1,0 +1,129 @@
+#!/bin/env bash
+
+# ---------------------
+# configuration section
+# ---------------------
+
+CONTAINER_NAME=devenv
+IMAGE_NAME=devenv
+USER_NAME=ansible
+USER_UID=1000
+USER_GID=1000
+WORK_DIRECTORY=${HOME}/repository/dev/ansible
+
+# ----------------
+# template section
+# ----------------
+
+CONTAINER_CONFIG="FROM registry.fedoraproject.org/fedora:latest
+RUN dnf install -y git-core fuse-overlayfs less ncurses neovim podman python-pip --exclude container-selinux
+RUN dnf update -y
+RUN python3 -m pip install ansible-core ansible-navigator
+RUN groupadd -g ${USER_GID} ${USER_NAME}
+RUN useradd -u ${USER_UID} -g ${USER_NAME} ${USER_NAME}
+RUN mkdir -p /home/${USER_NAME}/.config /home/${USER_NAME}/.ssh /home/${USER_NAME}/dev
+RUN echo 'alias vi=nvim' > /etc/profile.d/neovim.sh
+RUN echo 'export EDITOR=\"\$(which nvim)\"' >> /etc/profile.d/neovim.sh
+COPY .bashrc /home/${USER_NAME}/.
+COPY .ssh/ /home/${USER_NAME}/.ssh/.
+COPY nvim/ /home/${USER_NAME}/.config/nvim
+RUN chown -R ${USER_NAME}:${USER_NAME} /home/${USER_NAME}
+RUN echo '${USER_NAME}:10000:5000' >/etc/subuid
+RUN echo '${USER_NAME}:10000:5000' >/etc/subgid
+RUN setcap cap_setuid+ep /usr/bin/newuidmap
+RUN setcap cap_setgid+ep /usr/bin/newgidmap
+ENTRYPOINT /bin/bash"
+
+# ----------------
+# function section
+# ----------------
+
+function build_image () {
+
+	## -b	build dev environment image
+
+	# copy custom user from current environment
+	# ~/.ssh for git keys
+	# ~/.config/nvim for custom nvim configurations
+	cp -Rp ~/.bashrc ~/.ssh ~/.config/nvim containers/.
+	rm -f containers/nvim/lazy-lock.json
+
+	echo ----------------------------------------
+	echo generating container build configuration
+	echo ----------------------------------------
+
+	# initialize containerfile
+	echo "$CONTAINER_CONFIG" | tee containers/Containerfile
+
+	echo ------------------------
+	echo building container image
+	echo ------------------------
+
+	podman build -t "$IMAGE_NAME" containers
+	rm -rf containers/.bashrc containers/.ssh containers/nvim
+
+}
+
+function deploy_container () {
+
+	## -d	deploy container based on dev image
+
+	echo -----------------
+	echo running container
+	echo -----------------
+
+	podman unshare chown -R ${USER_UID}:${USER_GID} ${WORK_DIRECTORY}
+	podman run -dt -e "TERM=xterm-256color" --rm --security-opt label=disable --security-opt unmask=/proc/* --security-opt seccomp=unconfined --network host --user ${USER_NAME} --device /dev/fuse --name ${CONTAINER_NAME} -v ${WORK_DIRECTORY}:/home/${USER_NAME}/dev -h ${CONTAINER_NAME} localhost/${CONTAINER_NAME}:latest
+
+}
+
+function show_help () {
+
+	## -h	show help
+
+	echo "Usage: $0 [OPTION]"
+	echo "Build and/or deploy a containerized development environment"
+	echo
+	grep \#\# "$0" | sed 's/##//' | grep -v grep
+	echo
+
+}
+
+# ----------------------
+# command line arguments
+# ----------------------
+
+while getopts ":bdh" OPT; do
+
+	case ${OPT} in
+
+		b) # build image
+			build_image
+			exit
+			;;
+
+		d) # deploy container
+			deploy_container
+			exit
+			;;
+
+		h) # show help
+			show_help
+			exit
+			;;
+
+		\?)
+			show_help
+			echo "Invalid option: $OPTARG"
+			exit
+			;;
+
+		:)
+			show_help
+			echo "Missing argument: $OPTARG requires an argument"
+			exit
+			;;
+
+	esac
+
+done
