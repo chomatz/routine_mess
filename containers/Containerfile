@@ -1,0 +1,18 @@
+FROM registry.fedoraproject.org/fedora:latest
+RUN dnf install -y git-core fuse-overlayfs less ncurses neovim podman python-pip --exclude container-selinux
+RUN dnf update -y
+RUN python3 -m pip install ansible-core ansible-navigator
+RUN groupadd -g 1000 ansible
+RUN useradd -u 1000 -g ansible ansible
+RUN mkdir -p /home/ansible/.config /home/ansible/.ssh /home/ansible/dev
+RUN echo 'alias vi=nvim' > /etc/profile.d/neovim.sh
+RUN echo 'export EDITOR="$(which nvim)"' >> /etc/profile.d/neovim.sh
+COPY .bashrc /home/ansible/.
+COPY .ssh/ /home/ansible/.ssh/.
+COPY nvim/ /home/ansible/.config/nvim
+RUN chown -R ansible:ansible /home/ansible
+RUN echo 'ansible:10000:5000' >/etc/subuid
+RUN echo 'ansible:10000:5000' >/etc/subgid
+RUN setcap cap_setuid+ep /usr/bin/newuidmap
+RUN setcap cap_setgid+ep /usr/bin/newgidmap
+ENTRYPOINT /bin/bash
