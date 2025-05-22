@@ -4,12 +4,12 @@
 # configuration section
 # ---------------------
 
-CONTAINER_NAME=devenv
-IMAGE_NAME=devenv
-USER_NAME=ansible
+CONTAINER_NAME=laboratory
+IMAGE_NAME=development
+USER_NAME=developer
 USER_UID=1000
 USER_GID=1000
-WORK_DIRECTORY=${HOME}/repository/dev/ansible
+WORK_DIRECTORY=${HOME}/repository/${CONTAINER_NAME}
 
 # ----------------
 # template section
@@ -21,7 +21,7 @@ RUN dnf update -y
 RUN python3 -m pip install ansible-core ansible-navigator
 RUN groupadd -g ${USER_GID} ${USER_NAME}
 RUN useradd -u ${USER_UID} -g ${USER_NAME} ${USER_NAME}
-RUN mkdir -p /home/${USER_NAME}/.config /home/${USER_NAME}/.ssh /home/${USER_NAME}/dev
+RUN mkdir -p /home/${USER_NAME}/.config /home/${USER_NAME}/.ssh /home/${USER_NAME}/${CONTAINER_NAME}
 RUN echo 'alias vi=nvim' > /etc/profile.d/neovim.sh
 RUN echo 'export EDITOR=\"\$(which nvim)\"' >> /etc/profile.d/neovim.sh
 COPY .bashrc /home/${USER_NAME}/.
@@ -73,7 +73,7 @@ function deploy_container () {
 	echo -----------------
 
 	podman unshare chown -R ${USER_UID}:${USER_GID} ${WORK_DIRECTORY}
-	podman run -dt -e "TERM=xterm-256color" --rm --security-opt label=disable --security-opt unmask=/proc/* --security-opt seccomp=unconfined --network host --user ${USER_NAME} --device /dev/fuse --name ${CONTAINER_NAME} -v ${WORK_DIRECTORY}:/home/${USER_NAME}/dev -h ${CONTAINER_NAME} localhost/${CONTAINER_NAME}:latest
+	podman run --detach --tty --security-opt label=disable --security-opt unmask=/proc/* --security-opt seccomp=unconfined --network host --user ${USER_NAME} --device /dev/fuse --name ${CONTAINER_NAME} --volume ${WORK_DIRECTORY}:/home/${USER_NAME}/${CONTAINER_NAME} --hostname ${CONTAINER_NAME} --env TERM=xterm-256color localhost/${CONTAINER_NAME}:latest
 
 }
 
