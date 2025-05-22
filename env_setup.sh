@@ -72,6 +72,7 @@ function deploy_container () {
 	echo running container
 	echo -----------------
 
+	# pre-flight checks
 	mkdir -p ${WORK_DIRECTORY} &> /dev/null
 	podman unshare chown -R ${USER_UID}:${USER_GID} ${WORK_DIRECTORY}
 
