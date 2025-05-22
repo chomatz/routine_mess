@@ -96,6 +96,7 @@ function deploy_container () {
 		--volume ${WORK_DIRECTORY}:/home/${USER_NAME}/${CONTAINER_NAME} \
 		--hostname ${CONTAINER_NAME} \
 		--env TERM=xterm-256color \
+		--workdir /home/${USER_NAME} \
 		localhost/${IMAGE_NAME}:latest
 
 	fi
