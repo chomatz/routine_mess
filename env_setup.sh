@@ -101,7 +101,7 @@ function deploy_container () {
 	fi
 
 	# connect to the running container
-	podman exec --interactive --tty --workdir /home/${USER_NAME} ${CONTAINER_NAME} bash
+	podman attach ${CONTAINER_NAME}
 
 }
 
