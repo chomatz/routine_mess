@@ -110,10 +110,12 @@ function show_help () {
 
 	## -h	show help
 
-	echo "Usage: $0 [OPTION]"
+	echo
 	echo "Build and/or deploy a containerized development environment"
 	echo
-	grep \#\# "$0" | sed 's/##//' | grep -v grep
+	echo "Usage: ${0} [OPTION]"
+	echo
+	grep \#\# "${0}" | sed 's/##//' | grep -v grep
 	echo
 
 }
