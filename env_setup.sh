@@ -74,7 +74,26 @@ function deploy_container () {
 
 	mkdir -p ${WORK_DIRECTORY} &> /dev/null
 	podman unshare chown -R ${USER_UID}:${USER_GID} ${WORK_DIRECTORY}
-	podman run --detach --tty --security-opt label=disable --security-opt unmask=/proc/* --security-opt seccomp=unconfined --network host --user ${USER_NAME} --device /dev/fuse --name ${CONTAINER_NAME} --volume ${WORK_DIRECTORY}:/home/${USER_NAME}/${CONTAINER_NAME} --hostname ${CONTAINER_NAME} --env TERM=xterm-256color localhost/${CONTAINER_NAME}:latest
+
+	# start container if it exists - otherwise create it
+	if ($(podman inspect ${CONTAINER_NAME} &> /dev/null)); then
+		podman start ${CONTAINER_NAME}
+	else
+		podman run \
+		--detach \
+		--tty \
+		--security-opt label=disable \
+		--security-opt unmask=/proc/* \
+		--security-opt seccomp=unconfined \
+		--network host \
+		--user ${USER_NAME} \
+		--device /dev/fuse \
+		--name ${CONTAINER_NAME} \
+		--volume ${WORK_DIRECTORY}:/home/${USER_NAME}/${CONTAINER_NAME} \
+		--hostname ${CONTAINER_NAME} \
+		--env TERM=xterm-256color \
+		localhost/${IMAGE_NAME}:latest
+	fi
 
 }
 
