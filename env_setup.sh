@@ -25,9 +25,8 @@ RUN useradd -u ${USER_UID} -g ${USER_NAME} ${USER_NAME}
 RUN mkdir -p /home/${USER_NAME}/.config /home/${USER_NAME}/.ssh /home/${USER_NAME}/${CONTAINER_NAME}
 RUN echo 'alias vi=nvim' > /etc/profile.d/neovim.sh
 RUN echo 'export EDITOR=\"\$(which nvim)\"' >> /etc/profile.d/neovim.sh
-COPY .bashrc /home/${USER_NAME}/.bashrc
-COPY .ssh/ /home/${USER_NAME}/.ssh
-COPY nvim/ /home/${USER_NAME}/.config/nvim
+COPY upload /tmp/upload
+RUN cp -R /tmp/upload/.[a-z]* /tmp/upload/* /home/${USER_NAME}/.
 RUN chown -R ${USER_NAME}:${USER_NAME} /home/${USER_NAME}
 RUN echo '${USER_NAME}:10000:5000' >/etc/subuid
 RUN echo '${USER_NAME}:10000:5000' >/etc/subgid
@@ -43,11 +42,15 @@ function build_image () {
 
 	## -b	build dev environment image
 
-	# copy custom user from current environment
+	# copy user content from current environment
+	# ~/.bashrc for prompt
 	# ~/.ssh for git keys
 	# ~/.config/nvim for custom nvim configurations
-	cp -Rp ~/.bashrc ~/.ssh ~/.config/nvim containers/.
-	rm -f containers/nvim/lazy-lock.json
+	mkdir -p containers/upload/.config
+	cp -Rp ~/.bashrc ~/.ssh containers/upload/.
+	cp -Rp ~/.config/nvim containers/upload/.config/.
+	date > containers/upload/build
+	rm -f containers/upload/.config/nvim/lazy-lock.json
 
 	echo ----------------------------------------
 	echo generating container build configuration
@@ -65,8 +68,10 @@ function build_image () {
 	--tag ${IMAGE_NAME} \
 	--volume ${HOME_DIRECTORY}:/home \
 	--security-opt label=disable \
+	--security-opt unmask=/proc/* \
+	--security-opt seccomp=unconfined \
 	containers
-	rm -rf containers/.bashrc containers/.ssh containers/nvim
+	rm -rf containers/upload
 
 }
 
