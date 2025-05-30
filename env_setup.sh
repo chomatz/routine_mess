@@ -25,8 +25,8 @@ RUN useradd -u ${USER_UID} -g ${USER_NAME} ${USER_NAME}
 RUN mkdir -p /home/${USER_NAME}/.config /home/${USER_NAME}/.ssh /home/${USER_NAME}/${CONTAINER_NAME}
 RUN echo 'alias vi=nvim' > /etc/profile.d/neovim.sh
 RUN echo 'export EDITOR=\"\$(which nvim)\"' >> /etc/profile.d/neovim.sh
-COPY .bashrc /home/${USER_NAME}/.
-COPY .ssh/ /home/${USER_NAME}/.ssh/.
+COPY .bashrc /home/${USER_NAME}/.bashrc
+COPY .ssh/ /home/${USER_NAME}/.ssh
 COPY nvim/ /home/${USER_NAME}/.config/nvim
 RUN chown -R ${USER_NAME}:${USER_NAME} /home/${USER_NAME}
 RUN echo '${USER_NAME}:10000:5000' >/etc/subuid
