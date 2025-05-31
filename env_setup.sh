@@ -97,6 +97,7 @@ function deploy_container () {
 		podman run \
 		--detach \
 		--tty \
+		--rm \
 		--security-opt label=disable \
 		--security-opt unmask=/proc/* \
 		--security-opt seccomp=unconfined \
