@@ -84,7 +84,12 @@ function deploy_container () {
 	echo -----------------
 
 	# pre-flight checks
-	mkdir -p ${WORK_DIRECTORY} &> /dev/null
+	if [ ! -d ${WORK_DIRECTORY} ]; then
+
+		mkdir -p ${WORK_DIRECTORY}
+
+	fi
+
 	podman unshare chown -R ${USER_UID}:${USER_GID} ${HOME_DIRECTORY}/${USER_NAME} ${WORK_DIRECTORY}
 
 	# start container if it exists - otherwise create it
