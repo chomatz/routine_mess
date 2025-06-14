@@ -85,9 +85,7 @@ function deploy_container () {
 
 	# create work directory as needed
 	if [ ! -d ${WORK_DIRECTORY} ]; then
-
 		mkdir -p ${WORK_DIRECTORY}
-
 	fi
 
 	# set work directory permissions
@@ -95,11 +93,8 @@ function deploy_container () {
 
 	# start container if it exists - otherwise create it
 	if ($(podman inspect ${CONTAINER_NAME} &> /dev/null)); then
-
 		podman start ${CONTAINER_NAME}
-
 	else
-
 		podman run \
 		--detach \
 		--tty \
@@ -117,7 +112,6 @@ function deploy_container () {
 		--env TERM=${TERM} \
 		--workdir /home/${USER_NAME} \
 		localhost/${IMAGE_NAME}:latest
-
 	fi
 
 	# connect to the running container
@@ -144,36 +138,28 @@ function show_help () {
 # ----------------------
 
 while getopts ":bdh" OPT; do
-
 	case ${OPT} in
-
 		b) # build image
 			build_image
 			exit
 			;;
-
 		d) # deploy container
 			deploy_container
 			exit
 			;;
-
 		h) # show help
 			show_help
 			exit
 			;;
-
 		\?)
 			show_help
 			echo "Invalid option: $OPTARG"
 			exit
 			;;
-
 		:)
 			show_help
 			echo "Missing argument: $OPTARG requires an argument"
 			exit
 			;;
-
 	esac
-
 done
