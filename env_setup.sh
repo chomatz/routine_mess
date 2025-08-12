@@ -9,8 +9,7 @@ IMAGE_NAME=development
 USER_NAME=developer
 USER_UID=1000
 USER_GID=1000
-HOME_DIRECTORY=${HOME}/repository/pod/mount/home
-WORK_DIRECTORY=${HOME}/repository/pod/mount/data/${CONTAINER_NAME}
+DATA_DIRECTORY=${HOME}/Repositories/pod/mount/${CONTAINER_NAME}
 
 # ----------------
 # template section
@@ -63,10 +62,10 @@ function build_image () {
 	echo building container image
 	echo ------------------------
 
-	mkdir -p ${HOME_DIRECTORY} &> /dev/null
+	mkdir -p ${DATA_DIRECTORY} &> /dev/null
 	podman build \
 	--tag ${IMAGE_NAME} \
-	--volume ${HOME_DIRECTORY}:/home \
+	--volume ${DATA_DIRECTORY}:/home \
 	--security-opt label=disable \
 	--security-opt unmask=/proc/* \
 	--security-opt seccomp=unconfined \
@@ -83,13 +82,8 @@ function deploy_container () {
 	echo running container
 	echo -----------------
 
-	# create work directory as needed
-	if [ ! -d ${WORK_DIRECTORY} ]; then
-		mkdir -p ${WORK_DIRECTORY}
-	fi
-
-	# set work directory permissions
-	podman unshare chown -R ${USER_UID}:${USER_GID} ${HOME_DIRECTORY}/${USER_NAME} ${WORK_DIRECTORY}
+	# set data directory permissions
+	podman unshare chown -R ${USER_UID}:${USER_GID} ${DATA_DIRECTORY}
 
 	# start container if it exists - otherwise create it
 	if ($(podman inspect ${CONTAINER_NAME} &> /dev/null)); then
@@ -106,8 +100,7 @@ function deploy_container () {
 		--user ${USER_NAME} \
 		--device /dev/fuse \
 		--name ${CONTAINER_NAME} \
-		--volume ${HOME_DIRECTORY}:/home \
-		--volume ${WORK_DIRECTORY}:/home/${USER_NAME}/${CONTAINER_NAME} \
+		--volume ${DATA_DIRECTORY}:/home \
 		--hostname ${CONTAINER_NAME} \
 		--env TERM=${TERM} \
 		--workdir /home/${USER_NAME} \
