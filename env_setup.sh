@@ -21,7 +21,7 @@ RUN dnf update -y
 RUN python3 -m pip install ansible-core ansible-navigator
 RUN groupadd -g ${USER_GID} ${USER_NAME}
 RUN useradd -u ${USER_UID} -g ${USER_NAME} ${USER_NAME}
-RUN mkdir -p /home/${USER_NAME}/.config /home/${USER_NAME}/.ssh /home/${USER_NAME}/${CONTAINER_NAME}
+RUN mkdir -p /home/${USER_NAME}/.config /home/${USER_NAME}/.ssh
 RUN echo 'alias vi=nvim' > /etc/profile.d/neovim.sh
 RUN echo 'export EDITOR=\"\$(which nvim)\"' >> /etc/profile.d/neovim.sh
 COPY upload /tmp/upload
