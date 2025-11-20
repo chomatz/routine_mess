@@ -18,7 +18,7 @@ DATA_DIRECTORY=${HOME}/Repositories/pod/mount/${CONTAINER_NAME}
 CONTAINER_CONFIG="FROM registry.fedoraproject.org/fedora:latest
 RUN dnf install -y git-core fuse-overlayfs less ncurses neovim podman python-pip --exclude container-selinux
 RUN dnf update -y
-RUN python3 -m pip install --resume-retries 10 ansible-core ansible-navigator
+RUN python3 -m pip install ansible-core ansible-navigator
 RUN groupadd -g ${USER_GID} ${USER_NAME}
 RUN useradd -u ${USER_UID} -g ${USER_NAME} ${USER_NAME}
 RUN mkdir -p /home/${USER_NAME}/.config /home/${USER_NAME}/.ssh
