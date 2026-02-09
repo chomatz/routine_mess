@@ -126,11 +126,24 @@ function show_help () {
 
 }
 
+function rebuild_image () {\
+
+	## -r	rebuild container image
+
+	echo ---------------------------------
+	echo removing existing container image
+	echo ---------------------------------
+
+	podman rmi ${IMAGE_NAME}
+	build_image
+
+}
+
 # ----------------------
 # command line arguments
 # ----------------------
 
-while getopts ":bdh" OPT; do
+while getopts ":bdhr" OPT; do
 	case ${OPT} in
 		b) # build image
 			build_image
@@ -142,6 +155,10 @@ while getopts ":bdh" OPT; do
 			;;
 		h) # show help
 			show_help
+			exit
+			;;
+		r) # rebuild_image
+			rebuild_image
 			exit
 			;;
 		\?)
