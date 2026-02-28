@@ -23,6 +23,7 @@ RUN groupadd -g ${USER_GID} ${USER_NAME}
 RUN useradd -u ${USER_UID} -g ${USER_NAME} ${USER_NAME}
 RUN mkdir -p /home/${USER_NAME}/.config /home/${USER_NAME}/.ssh
 RUN echo 'alias vi=\"nvim\"' > /etc/profile.d/neovim.sh
+RUN echo 'alias navigator=\"ansible-navigator exec env ANSIBLE_STDOUT_CALLBACK=default ansible-playbook\"' > /etc/profile.d/ansible-navigator.sh
 RUN echo 'export EDITOR=\"\$(which nvim)\"' >> /etc/profile.d/neovim.sh
 COPY upload /tmp/upload
 RUN cp -R /tmp/upload/.[a-z]* /tmp/upload/* /home/${USER_NAME}/.
